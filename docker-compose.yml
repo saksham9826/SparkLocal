@@ -13,7 +13,7 @@ services:
     container_name: jupyterlab
     ports:
       - 8888:8888
-      - 4040:4040
+      - 4041:4040
     volumes:
       - shared-workspace:/opt/workspace
   spark-master:
@@ -48,4 +48,30 @@ services:
       - shared-workspace:/opt/workspace
     depends_on:
       - spark-master
+  localstack:
+    container_name: localstackContainer.localhost.localstack.cloud
+    image: localstack/localstack
+    ports:
+      - "4510-4559:4510-4559"  # external service port range
+      - "4566:4566"            # LocalStack Edge Proxy
+    environment:
+      - DEBUG=${DEBUG-}
+      - DATA_DIR=${DATA_DIR-}
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR-}
+      - HOST_TMP_FOLDER=${TMPDIR:-/tmp/}localstack
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "${TMPDIR:-/tmp}/localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+  azurite:
+    container_name: azurite
+    image: mcr.microsoft.com/azure-storage/azurite
+    hostname: azurite
+    volumes:
+      - ./cert/azurite:/data
+    command: "azurite-blob --blobHost 0.0.0.0"
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
 ...
